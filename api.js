@@ -4,11 +4,12 @@ const path = require('path');
 const app = express();
 const port = 80;
 
-const views = path.join(__dirname,"./views");
-app.use(express.static(path.join(views)));
+const public = path.join(__dirname,"./public");
+app.use(express.static(path.join(public)));
+
 
 app.get('/',(req,res)=>{
-    const page = path.join(__dirname,"./views/index.html");
+    const page = path.join(__dirname,"./public/views/index.html");
     res.sendFile(page);
 })
 
