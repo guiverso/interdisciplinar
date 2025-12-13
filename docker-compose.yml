@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # 1. SERVIÇO DA APLICAÇÃO NODE.JS (app)
+  app:
+    build: . # Constrói a imagem a partir do Dockerfile na pasta atual (.)
+    container_name: app_node_express
+    restart: always
+    
+    ports:
+      - "80:3000"  # Acesso Web na porta 80
+      - "5555:5555" # Porta para o Prisma Studio
+    
+    volumes:
+      # Monta o código local na pasta de trabalho do container
+      - .:/usr/src/app 
+      # Exclusão da pasta node_modules (para não sobrescrever a instalação do container)
+      - /usr/src/app/node_modules 
+    
+    depends_on:
+      - db
+      
+    environment:
+      # Formato exigido pelo Prisma
+      DATABASE_URL: postgresql://postgres:suasenha@db:5432/projeto_db # <-- MUDE A SENHA!
+
+  # 2. SERVIÇO DO BANCO DE DADOS (db)
+  db:
+    image: postgres:15
+    container_name: db_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: suasenha # <-- USE A MESMA SENHA AQUI!
+      POSTGRES_DB: projeto_db
+    volumes:
+      # Montagem do volume persistente para os dados do Postgres
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  pgdata: # Define o volume persistente
