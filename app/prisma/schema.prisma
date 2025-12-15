@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+  binaryTargets   = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Adicione abaixo da 'datasource db'
+
+// Tabela 1: Conta (Usuário)
+model Conta {
+  id      Int     @id @default(autoincrement())
+  nome    String
+  senha   String  // Armazene como hash!
+  
+  // Relação: Uma Conta pode ter vários Pedidos
+  pedidos Pedidos[] 
+}
+
+// Tabela 2: Item (Produto)
+model Item {
+  id          Int     @id @default(autoincrement())
+  nome        String
+  preco       Float   
+  descricao   String? // Campo opcional
+  
+  // Relação: Um Item pode estar em muitos ItensPedido
+  itensPedido ItemPedido[]
+}
+
+// Tabela 3: Pedidos
+model Pedidos {
+  id          Int       @id @default(autoincrement())
+  numero      String    @unique
+  estado      String    @default("pendente") // pendente, fazendo, pronto
+  valor       Float     // Soma do preço dos itens
+  
+  // Chave Estrangeira: Referencia a Conta que fez o pedido
+  donoId      Int
+  dono        Conta     @relation(fields: [donoId], references: [id]) // dono(nome) na sua tabela
+
+  // Relação: Um Pedido pode ter vários ItensPedido
+  itensPedido ItemPedido[]
+}
+
+// Tabela N:N de Ligação (Itens do Pedido) - Melhor prática para listas de itens
+model ItemPedido {
+  id          Int     @id @default(autoincrement())
+  pedidoId    Int
+  itemId      Int
+  
+  pedido      Pedidos @relation(fields: [pedidoId], references: [id])
+  item        Item    @relation(fields: [itemId], references: [id])
+  
+  @@unique([pedidoId, itemId]) // Garante que um item só aparece uma vez no mesmo pedido
+}
