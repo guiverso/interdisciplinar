@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  app:
+    build: ./app
+    container_name: app_node_express
+    restart: always
+    
+    ports:
+      - "80:3000"
+      - "5555:5555"
+    
+    volumes:
+      - /usr/src/app/node_modules 
+    
+    depends_on:
+      - db
+      
+    environment:
+      DATABASE_URL: postgresql://postgres:suasenha@db:5432/projeto_db
+
+  db:
+    image: postgres:15
+    container_name: db_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: suasenha
+      POSTGRES_DB: projeto_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  pgdata:
